@@ -25,8 +25,7 @@ Kubernetes API credentials are sent in the following dict structure:
 
 # Requires
 
-```pyton
-
+```python
 @when('kube-dns.available')
 def save_dns_credentials(kube_dns):
     context = kube_dns.details()
