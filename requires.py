@@ -42,7 +42,12 @@ class KubeDNSRequireer(RelationBase):
                 return False
         return True
 
+    def current_seed(self):
+        ''' Return the random seed sent on the wire during worker
+        remote interrogation. Use this value to determine render
+        and recycle states '''
+        return self._get_value('random-seed')
+
     def _get_value(self, key):
         conv = self.conversation()
         return conv.get_remote(key)
-

@@ -38,3 +38,10 @@ class KubeDNSProvider(RelationBase):
                        'sdn-ip': sdn_ip}
         conv = self.conversation()
         conv.set_remote(data=credentials)
+
+    def set_seed(self, seed):
+        ''' Use this method to invoke a relationship-changed hook on the
+        remote unit during times of remote negotiation for cluster-hosted
+        dns '''
+        conv = self.conversation()
+        conv.set_remote(data={'random-seed': seed})
