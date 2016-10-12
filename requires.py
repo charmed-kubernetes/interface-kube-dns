@@ -45,4 +45,3 @@ class KubeDNSRequireer(RelationBase):
     def _get_value(self, key):
         conv = self.conversation()
         return conv.get_remote(key)
-
