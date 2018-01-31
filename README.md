@@ -1,3 +1,8 @@
+# Deprecation Notice
+
+This interface is deprecated. Kube-DNS info is now sent via
+[interface-kube-control](https://github.com/juju-solutions/interface-kube-control).
+
 # Kube-DNS
 
 This interface provides the DNS details for a Kubernetes cluster.
