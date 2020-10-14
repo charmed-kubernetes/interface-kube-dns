@@ -1,43 +1,21 @@
-# Deprecation Notice
-
-This interface is deprecated. Kube-DNS info is now sent via
-[interface-kube-control](https://github.com/juju-solutions/interface-kube-control).
-
 # Kube-DNS
 
-This interface provides the DNS details for a Kubernetes cluster.
+This interface allows a DNS provider, such as CoreDNS, to provide name
+resolution for a Kubernetes cluster.
 
-The majority of kubernetes services will expect the following values:
-
-```
---cluster-dns $IP_OF_DNS_SERVER
---cluster-domain $DOMAIN
-```
+(Note: this interface was previously used by the Kubernetes Master charm to
+communicate the DNS provider info to the Kubernetes Worker charm, but that
+usage was folded into the `kube-control` interface.)
 
 
 # Provides
 
-Kubernetes API credentials are sent in the following dict structure:
-
-```python
-{"private-address": "",
- "port": "53",
- "domain": "cluster.local",
- "sdn_ip": "10.1.0.10"
-}
-
-```
+The provider should look for the `{endpoint_name}.connected` flag and call
+the `set_dns_info` method with the `domain`, `sdn_ip`, and `port` info (note:
+these must be provided as keyword arguments).
 
 # Requires
 
-```python
-@when('kube-dns.available')
-def save_dns_credentials(kube_dns):
-    context = kube_dns.details()
-    print(context['domain'])
-    print(context['private-address'])
-    print(context['sdn-ip'])
-    print(context['port'])
-```
-
-
+The requirer should look for the `{endpoint_name}.available` flag and call the
+`details` method, which will return a dictionary with the `domain`, `sdn-ip`,
+and `port` keys.

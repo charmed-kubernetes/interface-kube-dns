@@ -11,37 +11,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from charms.reactive import RelationBase
-from charms.reactive import hook
-from charms.reactive import scopes
+from charms.reactive import Endpoint, toggle_flag
 
 
-class KubeDNSRequireer(RelationBase):
-    scope = scopes.GLOBAL
-
-    @hook('{requires:kube-dns}-relation-{joined,changed}')
-    def joined_or_changed(self):
-        ''' Set the available state if we have the minimum credentials '''
-        if self.has_info():
-            conv = self.conversation()
-            conv.set_state('{relation_name}.available')
+class KubeDNSRequireer(Endpoint):
+    def manage_flags(self):
+        '''Set flags according to whether we have DNS provider details.'''
+        toggle_flag(self.expand_name('{endpoint_name}.available'),
+                    self.has_info())
 
     def details(self):
-        ''' Return a small subnet of the data '''
-        return {'private-address': self._get_value('private-address'),
-                'port': self._get_value('port'),
-                'domain': self._get_value('domain'),
-                'sdn-ip': self._get_value('sdn-ip')}
+        '''Return the DNS provider details.'''
+        return {
+            'domain': self._get_value('domain'),
+            'sdn-ip': self._get_value('sdn-ip'),
+            'port': self._get_value('port'),
+        }
 
     def has_info(self):
-        ''' Determine if we have a hostname and a port and domain '''
-        to_find = ['private-address', 'port', 'domain', 'sdn-ip']
-        # Iterate through our services and verify we have values
-        for value in to_find:
-            if not self._get_value(value):
-                return False
-        return True
+        ''' Determine if we have all needed info'''
+        return all(self.details().values())
 
     def _get_value(self, key):
-        conv = self.conversation()
-        return conv.get_remote(key)
+        return self.all_joined_units.received_raw.get(key)

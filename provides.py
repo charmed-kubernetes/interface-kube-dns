@@ -11,30 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from charms.reactive import RelationBase
-from charms.reactive import hook
-from charms.reactive import scopes
+from charms.reactive import Endpoint, toggle_flag
 
 
-class KubeDNSProvider(RelationBase):
-    scope = scopes.GLOBAL
+class KubeDNSProvider(Endpoint):
+    def manage_flags(self):
+        toggle_flag(self.expand_name('{endpoint_name}.connected'),
+                    self.is_joined)
 
-    @hook('{provides:kube-dns}-relation-{joined,changed}')
-    def joined_or_changed(self):
-        conv = self.conversation()
-        conv.set_state('{relation_name}.connected')
-
-    @hook('{provides:kube-dns}-relation-{departed}')
-    def departed(self):
-        conv = self.conversation()
-        conv.remove_state('{relation_name}.connected')
-
-    def set_dns_info(self, port, domain, sdn_ip):
-        ''' We will need the domain, sdn_ip, and port of the dns service, if
-            sdn_ip is not required in your deployment, the units private-ip
-            is availble implicitly.'''
-        credentials = {'port': port,
-                       'domain': domain,
-                       'sdn-ip': sdn_ip}
-        conv = self.conversation()
-        conv.set_remote(data=credentials)
+    def set_dns_info(self, *, domain, sdn_ip, port):
+        '''Set the domain, sdn_ip, and port of the DNS provider.'''
+        for relation in self.relations:
+            relation.to_publish_raw.update({
+                'domain': domain,
+                'sdn-ip': sdn_ip,
+                'port': port,
+            })
